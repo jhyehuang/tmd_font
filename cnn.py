@@ -16,16 +16,18 @@ from __future__ import print_function
 
 import tensorflow as tf
 from data_folder_split import load_image 
-
+import numpy as np
+import pandas as pd
 
 
 FLAGS = None
 
-data_dir = '../data/TMD/npz_train/'
+data_file = '../data/TMD/npz_train/float_train/data_train.csv'
 
+train_data=pd.read_csv(data_file)
 
-x = tf.placeholder(tf.float32, [None, 784])
-y_ = tf.placeholder(tf.float32, [None, 10])
+x = tf.placeholder(tf.float32, [None, 128*128])
+y_ = tf.placeholder(tf.float32, [None, 100])
 
 
 
@@ -56,7 +58,7 @@ def max_pool_2x2(x):
 
 W_conv1 = weight_variable([5, 5, 1, 32])
 b_conv1 = bias_variable([32])
-x_image = tf.reshape(x, [-1,28,28,1])
+x_image = tf.reshape(x, [-1,128,128,1])
 h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
 h_pool1 = max_pool_2x2(h_conv1)
 
@@ -80,9 +82,9 @@ h_pool2 = max_pool_2x2(h_conv2)
 # In[42]:
 
 
-W_fc1 = weight_variable([7 * 7 * 64, 999])
+W_fc1 = weight_variable([32 * 32 * 64, 999])
 b_fc1 = bias_variable([999])
-h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
+h_pool2_flat = tf.reshape(h_pool2, [-1, 32*32*64])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
 
@@ -100,8 +102,8 @@ h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 # In[44]:
 
 
-W_fc2 = weight_variable([999, 10])
-b_fc2 = bias_variable([10])
+W_fc2 = weight_variable([999, 100])
+b_fc2 = bias_variable([100])
 y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
 
@@ -134,28 +136,3 @@ with tf.Session() as sess:
     print ("test accuracy %g"%accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
 
 
-# ### 使用tensorflow，构造并训练一个神经网络，在测试机上达到超过98%的准确率。
-# 在完成过程中，需要综合运用目前学到的基础知识：
-# - 深度神经网络
-# - 激活函数
-# - 正则化
-# - 初始化
-# - 卷积
-# - 池化
-# 
-# 
-# ### 并探索如下超参数设置：
-# - 卷积kernel size
-# - 卷积kernel 数量
-# - 学习率
-# - 正则化因子
-# - 权重初始化分布参数整
-
-# 
-# ## 评价标准
-# 
-# - 准确度达到98%或者以上60分，作为及格标准，未达到者本作业不及格，不予打分。
-# - 使用了正则化因子或文档中给出描述：10分。
-# - 手动初始化参数或文档中给出描述：10分，不设置初始化参数的，只使用默认初始化认为学员没考虑到初始化问题，不给分。
-# - 学习率调整：10分，需要文档中给出描述。
-# - 卷积kernel size和数量调整：10分，需要文档中给出描述。
