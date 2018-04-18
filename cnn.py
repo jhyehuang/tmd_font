@@ -22,9 +22,63 @@ import pandas as pd
 
 FLAGS = None
 
-data_file = '../data/TMD/npz_train/float_train/data_train.csv'
+data_file = '../data/TMD/npz_train/train/data_00000-of-00005.tfrecord'
 
-train_data=pd.read_csv(data_file)
+
+def records_to(file, num_threads=2, num_epochs=2, batch_size=2, min_after_dequeue=2):
+    reader = tf.TFRecordReader()
+    file_queue = tf.train.string_input_producer(file, num_epochs=num_epochs,)
+    _, example = reader.read(file_queue)
+    features_dict = tf.parse_single_example(example, 
+        features={
+            'image/class/label': tf.FixedLenFeature([], tf.int),
+            'image/encoded': tf.FixedLenFeature([], tf.float32),
+            'image/format': tf.FixedLenFeature([], tf.string),
+            'image/height': tf.FixedLenFeature([], tf.string),
+            'image/width': tf.FixedLenFeature([], tf.string)
+        })
+    # n: Tensor("ParseSingleExample/Squeeze_name:0", shape=(), dtype=string)
+    label = features_dict['image/class/label']
+    image = features_dict['image/encoded']
+    image_format = features_dict['image/format']
+    height = features_dict['image/height']
+    width = features_dict['image/width']
+    label, image, image_format,height,width = tf.train.shuffle_batch(
+        [label, image, image_format,height,width],
+        batch_size=batch_size,
+        num_threads=num_threads,
+        capacity = min_after_dequeue + 3 * batch_size,
+        min_after_dequeue = min_after_dequeue
+    )
+    # 数据格式为Tensor
+    return label, image, image_format,height,width
+
+def train():
+    label, image, image_format,height,width = records_to(data_file)
+    with tf.Session() as sess:
+        tf.group(tf.global_variables_initializer(),
+            tf.local_variables_initializer()).run()
+        tf.train.start_queue_runners(sess=sess)
+        label_val, image_val, image_format_val , height_val, width_val \
+        = sess.run([label, image, image_format,height,width])
+        print(label_val, image_val, image_format_val , height_val, width_val)
+
+record_iterator=tf.python_io.tf_record_iterator(path=data_file)
+for string_record in record_iterator:
+    
+    example = tf.train.Example()
+    example.ParseFromString(string_record)
+   # print (example)
+    n = example.features.feature['image/class/label'].int64_list.value
+    t = example.features.feature['image/encoded'].bytes_list.value
+    d = example.features.feature['image/format'].bytes_list.value
+    e = example.features.feature['image/height'].int64_list .value
+    f = example.features.feature['image/width'].int64_list .value
+    
+    print(n,  d,e,f)
+    break
+
+
 
 x = tf.placeholder(tf.float32, [None, 128*128])
 y_ = tf.placeholder(tf.float32, [None, 100])

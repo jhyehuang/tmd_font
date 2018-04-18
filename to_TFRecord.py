@@ -35,8 +35,10 @@ def convert_dataset(list_path, output_dir, _NUM_SHARDS=5):
                     image_data = tf.gfile.FastGFile(lines[i][1], 'rb').read()
                     image = sess.run(decode_jpeg, feed_dict={decode_jpeg_data: image_data})
                     height, width = image.shape[0], image.shape[1]
-                    example = dataset_utils.image_to_tfexample(
-                        image_data, b'jpg', height, width, int(lines[i][2].replace('\n','')))
+                    features = tf.train.Features(feature={
+                        'image':image_data, 'image_format':b'jpg', 'height':height, \
+                        'width':width, 'label':int(lines[i][2].replace('\n',''))})
+                    example = tf.train.Example(features=features)
                     tfrecord_writer.write(example.SerializeToString())
                 tfrecord_writer.close()
 
