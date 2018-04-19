@@ -11,6 +11,7 @@ import math
 import os
 import tensorflow as tf
 from  data_folder_split import mkdir ,des_path,load_image
+#import adjust_pic as ap
 
 def convert_dataset(list_path, output_dir, _NUM_SHARDS=5):
     fd = open(list_path)
@@ -21,8 +22,6 @@ def convert_dataset(list_path, output_dir, _NUM_SHARDS=5):
     fd.close()
     num_per_shard = int(math.ceil(len(lines) / float(_NUM_SHARDS)))
     with tf.Graph().as_default():
-        decode_jpeg_data = tf.placeholder(dtype=tf.string)
-        decode_jpeg = tf.image.decode_jpeg(decode_jpeg_data, channels=3)
         with tf.Session('') as sess:
             for shard_id in range(_NUM_SHARDS):
                 output_path = os.path.join(output_dir,
@@ -33,11 +32,20 @@ def convert_dataset(list_path, output_dir, _NUM_SHARDS=5):
                 end_ndx = min((shard_id + 1) * num_per_shard, len(lines))
                 for i in range(start_ndx, end_ndx):
                     image_data = tf.gfile.FastGFile(lines[i][1], 'rb').read()
-                    image = sess.run(decode_jpeg, feed_dict={decode_jpeg_data: image_data})
+                    image =tf.image.decode_jpeg(image_data) 
+                    image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+#                    image=tf.image.resize_images(image, [100, 100], method=0)
+                    image = sess.run(image)
+                    image_raw = image.tostring() 
                     height, width = image.shape[0], image.shape[1]
-                    features = tf.train.Features(feature={
-                        'image':image_data, 'image_format':b'jpg', 'height':height, \
-                        'width':width, 'label':int(lines[i][2].replace('\n',''))})
+                    print('{}/{}'.format(i,end_ndx))
+                    feature={
+                        'image':tf.train.Feature(bytes_list = tf.train.BytesList(value=[image_raw])),
+                        'image_format':tf.train.Feature(bytes_list = tf.train.BytesList(value=[b'jpg'])), 
+                        'height':tf.train.Feature(int64_list = tf.train.Int64List(value=[height])), 
+                        'width':tf.train.Feature(int64_list = tf.train.Int64List(value=[width])),
+                        'label':tf.train.Feature(int64_list = tf.train.Int64List(value=[int(lines[i][2].replace('\n',''))]))}
+                    features = tf.train.Features(feature=feature)
                     example = tf.train.Example(features=features)
                     tfrecord_writer.write(example.SerializeToString())
                 tfrecord_writer.close()

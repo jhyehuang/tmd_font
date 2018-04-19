@@ -61,6 +61,7 @@ def graph2npz():
     mkdir(des_path)
     mkdir(src_path)
     fd = open(des_path+label_file_name, 'w')
+    fd1 = open(des_path+'font_label_list.txt', 'w')
     for f in pathDir:
         label_list.append(f)
         next_layer_files_list=src_path+f
@@ -69,7 +70,9 @@ def graph2npz():
         for g in graph_list:
             image_name=next_layer_files_list+'/'+g
             fd.write('{},{},{}\n'.format(f, image_name, label_list.index(f)))
+        fd1.write('{}:{}\n'.format(label_list.index(f), f))
     fd.close()
+    fd1.close()
     
 def random_split_data():        
     test_train_split_ratio = 0.9

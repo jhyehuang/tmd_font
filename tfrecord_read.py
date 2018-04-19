@@ -27,19 +27,20 @@ def records_to(file, num_threads=2, num_epochs=2, batch_size=30, min_after_deque
     _, example = reader.read(file_queue)
     features_dict = tf.parse_single_example(example, 
         features={
-            'image/class/label': tf.FixedLenFeature([], tf.int64),
-            'image/encoded': tf.FixedLenFeature([], tf.string),
-#            'image/format': tf.FixedLenFeature([], tf.string),
-            'image/height': tf.FixedLenFeature([], tf.string),
-            'image/width': tf.FixedLenFeature([], tf.string)
+            'label': tf.FixedLenFeature([], tf.int64),
+            'image': tf.FixedLenFeature([], tf.string),
+            'image_format': tf.FixedLenFeature([], tf.string),
+            'height': tf.FixedLenFeature([], tf.int64),
+            'width': tf.FixedLenFeature([], tf.int64)
         })
-    # n: Tensor("ParseSingleExample/Squeeze_name:0", shape=(), dtype=string)
-    label =  tf.cast(features_dict['image/class/label'],tf.int32)
-    image = tf.decode_raw(features_dict['image/encoded'], tf.uint8)
-    image = tf.cast(image, tf.float32) - 0.5
-#    image_format =  tf.cast(features_dict['image/format'],tf.string)
-    height =  tf.cast(features_dict['image/height'],tf.int32)
-    width =  tf.cast(features_dict['image/width'],tf.int32)
+    label =  tf.cast(features_dict['label'],tf.int64)
+    image = tf.decode_raw(features_dict['image'], tf.uint8)
+    
+    #image = tf.cast(image, tf.float32) - 0.5
+    image_format =  tf.cast(features_dict['image_format'],tf.string)
+    height =  tf.cast(features_dict['height'],tf.int64)
+    width =  tf.cast(features_dict['width'],tf.int64)
+    image=image.set_shape([None,])
     print (label,image,height,width)
     label_batch, image_batch,height_batch,width_batch = tf.train.shuffle_batch(
         [label, image,height,width],
