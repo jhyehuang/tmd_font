@@ -210,4 +210,4 @@ def run(dataset_dir):
 #  _clean_up_temporary_files(dataset_dir)
   print('\nFinished converting the Flowers dataset!')
 
-run(dataset_dir='D:\GitHub\data\TMD')
+run(dataset_dir='/home/zhijie.huang/github/data/TMD')

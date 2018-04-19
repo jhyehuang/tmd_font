@@ -20,6 +20,8 @@ from __future__ import print_function
 import os
 import sys
 import tarfile
+#reload(sys)  
+#sys.setdefaultencoding("utf-8")  #中文标签，增加utf-8  
 
 from six.moves import urllib
 import tensorflow as tf
