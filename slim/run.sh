@@ -1,14 +1,14 @@
-python download_and_convert_data.py --dataset_name=chinese_font --dataset_dir=/home/zhijie.huang/github/data/TMD
+python download_and_convert_data.py --dataset_name=chinese_font --dataset_dir=jhyehuang/tmd-data
 
 
 python -u train_image_classifier.py \
     --dataset_name=chinese_font \
-    --dataset_dir=/home/zhijie.huang/github/data/TMD \
+    --dataset_dir=jhyehuang/tmd-data \
     --checkpoint_path=/home/zhijie.huang/github/data/inception_v4.ckpt \
     --model_name=inception_v4 \
     --checkpoint_exclude_scopes=InceptionV4/Logits,InceptionV4/AuxLogits/Aux_logits \
     --trainable_scopes=InceptionV4/Logits,InceptionV4/AuxLogits/Aux_logits \
-    --train_dir=/home/zhijie.huang/github/data/TMD/train_set \
+    --train_dir=jhyehuang/tmd-data/train_set \
     --learning_rate=0.001 \
     --learning_rate_decay_factor=0.76\
     --num_epochs_per_decay=50 \
