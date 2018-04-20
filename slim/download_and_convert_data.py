@@ -18,16 +18,9 @@ Usage:
 ```shell
 
 $ python download_and_convert_data.py \
-    --dataset_name=mnist \
-    --dataset_dir=/tmp/mnist
+    --dataset_name=chinese_font \
+    --dataset_dir=/tmp/chinese_font
 
-$ python download_and_convert_data.py \
-    --dataset_name=cifar10 \
-    --dataset_dir=/tmp/cifar10
-
-$ python download_and_convert_data.py \
-    --dataset_name=flowers \
-    --dataset_dir=/tmp/flowers
 ```
 """
 from __future__ import absolute_import
@@ -36,9 +29,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from datasets import download_and_convert_cifar10
-from datasets import download_and_convert_flowers
-from datasets import download_and_convert_mnist
+from datasets import convert_data
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -59,12 +50,8 @@ def main(_):
   if not FLAGS.dataset_dir:
     raise ValueError('You must supply the dataset directory with --dataset_dir')
 
-  if FLAGS.dataset_name == 'cifar10':
-    download_and_convert_cifar10.run(FLAGS.dataset_dir)
-  elif FLAGS.dataset_name == 'flowers':
-    download_and_convert_flowers.run(FLAGS.dataset_dir)
-  elif FLAGS.dataset_name == 'mnist':
-    download_and_convert_mnist.run(FLAGS.dataset_dir)
+  if FLAGS.dataset_name == 'chinese_font':
+    convert_data.run(FLAGS.dataset_dir)
   else:
     raise ValueError(
         'dataset_name [%s] was not recognized.' % FLAGS.dataset_name)

@@ -34,7 +34,7 @@ import sys
 
 import tensorflow as tf
 
-import dataset_utils
+from datasets import dataset_utils
 
 # The URL where the Flowers data can be downloaded.
 _DATA_URL = 'http://download.tensorflow.org/example_images/flower_photos.tgz'
@@ -99,7 +99,7 @@ def _get_filenames_and_classes(dataset_dir):
 
 
 def _get_dataset_filename(dataset_dir, split_name, shard_id):
-  output_filename = 'flowers_%s_%05d-of-%05d.tfrecord' % (
+  output_filename = 'chinese_font_%s_%05d-of-%05d.tfrecord' % (
       split_name, shard_id, _NUM_SHARDS)
   return os.path.join(dataset_dir, output_filename)
 
@@ -160,7 +160,7 @@ def _clean_up_temporary_files(dataset_dir):
   filepath = os.path.join(dataset_dir, filename)
   tf.gfile.Remove(filepath)
 
-  tmp_dir = os.path.join(dataset_dir, 'flower_photos')
+  tmp_dir = os.path.join(dataset_dir, 'images')
   tf.gfile.DeleteRecursively(tmp_dir)
 
 
@@ -210,4 +210,4 @@ def run(dataset_dir):
 #  _clean_up_temporary_files(dataset_dir)
   print('\nFinished converting the Flowers dataset!')
 
-run(dataset_dir='/home/zhijie.huang/github/data/TMD')
+#run(dataset_dir='/home/zhijie.huang/github/data/TMD')
