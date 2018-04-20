@@ -15,3 +15,7 @@ python -u train_image_classifier.py \
     --optimizer=adam \
     --ignore_missing_vars=True \
     --batch_size=32
+
+
+ 
+    

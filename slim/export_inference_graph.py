@@ -111,9 +111,10 @@ def main(_):
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
         is_training=FLAGS.is_training)
     image_size = FLAGS.image_size or network_fn.default_image_size
-    placeholder = tf.placeholder(name='input', dtype=tf.float32,
-                                 shape=[FLAGS.batch_size, image_size,
-                                        image_size, 3])
+#    placeholder = tf.placeholder(name='input', dtype=tf.float32,
+#                                 shape=[FLAGS.batch_size, image_size,
+#                                        image_size, 3])
+    placeholder = tf.placeholder(name='input', dtype=tf.string)
     network_fn(placeholder)
     graph_def = graph.as_graph_def()
     with gfile.GFile(FLAGS.output_file, 'wb') as f:
@@ -122,3 +123,18 @@ def main(_):
 
 if __name__ == '__main__':
   tf.app.run()
+  
+#    python -u export_inference_graph.py \  
+#      --model_name=inception_v4 \  
+#      --output_file=./my_inception_v4.pb \  
+#      --dataset_name=flowers \  
+#      --dataset_dir=/media/han/code/data/  
+#      
+#    python -u /usr/local/lib/python2.7/dist-packages/tensorflow/python/tools/freeze_graph.py \  
+#      --input_graph=my_inception_v4.pb \  
+#      --input_checkpoint=/media/han/code/my_train/model.ckpt-1835 \  
+#      --output_graph=./my_inception_v4_freeze.pb \  
+#      --input_binary=True \  
+#      --output_node_name=InceptionV4/Logits/Predictions  
+#      
+#    cp /media/han/code/data/labels.txt ./my_inception_v4_freeze.label 
