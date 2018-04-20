@@ -7,4 +7,4 @@ Created on Fri Apr 20 12:42:02 2018
 
 import os
 
-os.system("sh ./slim/run.sh")
+os.system("sh run.sh")
