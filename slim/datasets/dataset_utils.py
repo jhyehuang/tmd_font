@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,13 +21,13 @@ from __future__ import print_function
 import os
 import sys
 import tarfile
-#reload(sys)  
-#sys.setdefaultencoding("utf-8")  #中文标签，增加utf-8  
+
 
 from six.moves import urllib
 import tensorflow as tf
 
 LABELS_FILENAME = 'labels.txt'
+
 
 
 def int64_feature(values):
