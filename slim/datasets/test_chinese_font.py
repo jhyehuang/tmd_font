@@ -31,7 +31,7 @@ slim = tf.contrib.slim
 
 _FILE_PATTERN = 'chinese_font_%s_*.tfrecord'
 
-SPLITS_TO_SIZES = {'train': 36000, 'validation': 4000,'test': 10000}
+SPLITS_TO_SIZES = {'test': 10000}
 
 _NUM_CLASSES = 100
 
@@ -72,13 +72,12 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
   keys_to_features = {
       'image/encoded': tf.FixedLenFeature((), tf.string, default_value=''),
       'image/format': tf.FixedLenFeature((), tf.string, default_value='jpg'),
-      'image/class/label': tf.FixedLenFeature(
-          [], tf.int64, default_value=tf.zeros([], dtype=tf.int64)),
+      'image/file_name': tf.FixedLenFeature((), tf.string, default_value=''),
   }
 
   items_to_handlers = {
       'image': slim.tfexample_decoder.Image(),
-      'label': slim.tfexample_decoder.Tensor('image/class/label'),
+      'file_name': slim.tfexample_decoder.Tensor('image/file_name'),
   }
 
   decoder = slim.tfexample_decoder.TFExampleDecoder(

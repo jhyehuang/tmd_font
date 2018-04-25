@@ -23,6 +23,7 @@ from datasets import flowers
 from datasets import imagenet
 from datasets import mnist
 from datasets import chinese_font
+from datasets import test_chinese_font
 
 datasets_map = {
     'cifar10': cifar10,
@@ -30,6 +31,7 @@ datasets_map = {
     'imagenet': imagenet,
     'mnist': mnist,
     'chinese_font': chinese_font,
+    'test_chinese_font':test_chinese_font
 }
 
 

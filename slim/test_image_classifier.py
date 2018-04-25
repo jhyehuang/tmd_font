@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import math
 import tensorflow as tf
+import numpy as np
 
 from datasets import dataset_factory
 from nets import nets_factory
@@ -28,7 +29,7 @@ from preprocessing import preprocessing_factory
 slim = tf.contrib.slim
 
 tf.app.flags.DEFINE_integer(
-    'batch_size', 100, 'The number of samples in each batch.')
+    'batch_size', 32, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
     'max_num_batches', None,
@@ -43,7 +44,7 @@ tf.app.flags.DEFINE_string(
     'checkpoint file.')
 
 tf.app.flags.DEFINE_string(
-    'eval_dir', '/tmp/tfmodel/', 'Directory where the results are saved to.')
+    'test_dir', '/tmp/tfmodel/', 'Directory where the results are saved to.')
 
 tf.app.flags.DEFINE_integer(
     'num_preprocessing_threads', 4,
@@ -86,6 +87,8 @@ def main(_):
   if not FLAGS.dataset_dir:
     raise ValueError('You must supply the dataset directory with --dataset_dir')
 
+  predictions_all=[]
+  filenames_all=[]
   tf.logging.set_verbosity(tf.logging.INFO)
   with tf.Graph().as_default():
     tf_global_step = slim.get_or_create_global_step()
@@ -104,8 +107,6 @@ def main(_):
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
         is_training=False)
 
-    num_batches_per_epoch = math.ceil(100 / float(batch_size))
-    num_steps_per_epoch = num_batches_per_epoch
     ##############################################################
     # Create a dataset provider that loads data from the dataset #
     ##############################################################
@@ -114,8 +115,7 @@ def main(_):
         shuffle=False,
         common_queue_capacity=2 * FLAGS.batch_size,
         common_queue_min=FLAGS.batch_size)
-    [image, label] = provider.get(['image', 'label'])
-    label -= FLAGS.labels_offset
+    [image, file_name] = provider.get(['image', 'file_name'])
 
     #####################################
     # Select the preprocessing function #
@@ -129,46 +129,20 @@ def main(_):
 
     image = image_preprocessing_fn(image, eval_image_size, eval_image_size)
 
-    images, labels = tf.train.batch(
-        [image, label],
+    images, file_names = tf.train.batch(
+        [image, file_name],
         batch_size=FLAGS.batch_size,
         num_threads=FLAGS.num_preprocessing_threads,
         capacity=5 * FLAGS.batch_size)
 
-    global_step = get_or_create_global_step()
-    global_step_op = tf.assign(global_step, global_step + 1) #no apply_gradient method so manually increasing the global_step
-        
     ####################
     # Define the model #
     ####################
     logits, _ = network_fn(images)
 
-    if FLAGS.moving_average_decay:
-      variable_averages = tf.train.ExponentialMovingAverage(
-          FLAGS.moving_average_decay, tf_global_step)
-      variables_to_restore = variable_averages.variables_to_restore(
-          slim.get_model_variables())
-      variables_to_restore[tf_global_step.op.name] = tf_global_step
-    else:
-      variables_to_restore = slim.get_variables_to_restore()
-
     predictions = tf.argmax(logits, 1)
-    labels = tf.squeeze(labels)
-
-    # Define the metrics:
-    names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
-        'Accuracy': slim.metrics.streaming_accuracy(predictions, labels),
-        'Recall_5': slim.metrics.streaming_recall_at_k(
-            logits, labels, 5),
-    })
-
-    # Print the summaries to screen.
-    for name, value in names_to_values.items():
-      summary_name = 'eval/%s' % name
-      op = tf.summary.scalar(summary_name, value, collections=[])
-      op = tf.Print(op, [value], summary_name)
-      tf.add_to_collection(tf.GraphKeys.SUMMARIES, op)
-
+    filenames_all.append(file_names)
+    predictions_all.append(predictions)
     # TODO(sguada) use num_epochs=1
     if FLAGS.max_num_batches:
       num_batches = FLAGS.max_num_batches
@@ -182,15 +156,21 @@ def main(_):
       checkpoint_path = FLAGS.checkpoint_path
 
     tf.logging.info('Evaluating %s' % checkpoint_path)
+    num_examples = 10000
+    batch_size = 32
+    num_batches = math.ceil(num_examples / float(batch_size))
 
-    slim.evaluation.evaluate_once(
+    # Setup the global step.
+    slim.get_or_create_global_step()
+
+    slim.evaluation.evaluation_loop(
         master=FLAGS.master,
-        checkpoint_path=checkpoint_path,
+        checkpoint_dir=checkpoint_path,
         logdir=FLAGS.test_dir,
-        num_evals=num_batches,
-        eval_op=list(names_to_updates.values()),
-        variables_to_restore=variables_to_restore)
+        num_evals=num_batches)
 
+    np.savetxt("labels.txt", labels_all)
+    np.savetxt("predictions.txt", predictions_all)
 
 if __name__ == '__main__':
   tf.app.run()

@@ -1,4 +1,6 @@
-python download_and_convert_data.py --dataset_name=chinese_font --dataset_dir=D:\GitHub\data\TMD
+python download_and_convert_data.py --dataset_name=chinese_font --dataset_dir=/home/zhijie.huang/github/data/TMD
+
+python ./datasets/convert_test_data.py --dataset_name=chinese_font --dataset_dir=/home/zhijie.huang/github/data/TMD
 
 
 python -u train_image_classifier.py \

@@ -111,10 +111,9 @@ def main(_):
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
         is_training=FLAGS.is_training)
     image_size = FLAGS.image_size or network_fn.default_image_size
-#    placeholder = tf.placeholder(name='input', dtype=tf.float32,
-#                                 shape=[FLAGS.batch_size, image_size,
-#                                        image_size, 3])
-    placeholder = tf.placeholder(name='input', dtype=tf.string)
+    placeholder = tf.placeholder(name='input', dtype=tf.float32,
+                                 shape=[FLAGS.batch_size, image_size,
+                                        image_size, 3])
     network_fn(placeholder)
     graph_def = graph.as_graph_def()
     with gfile.GFile(FLAGS.output_file, 'wb') as f:

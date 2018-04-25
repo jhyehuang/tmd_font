@@ -556,7 +556,7 @@ def main(_):
 
     # Add config to avoid 'could not satisfy explicit device' problem 
     sess_config = tf.ConfigProto(allow_soft_placement=True)
-
+    
     ###########################
     # Kicks off the training. #
     ###########################
