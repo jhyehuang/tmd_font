@@ -4,5 +4,7 @@ python test_image_classifier.py \
   --dataset_name=test_chinese_font \
   --dataset_split_name=test \
   --dataset_dir=/home/zhijie.huang/github/data/TMD \
-  --batch_size=32 \
+  --batch_size=1 \
+  --labels_file=/home/zhijie.huang/github/data/TMD/labels.txt \
   --model_name=densenet
+  

@@ -1,18 +1,3 @@
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Generic evaluation script that evaluates a model using a given dataset."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -20,22 +5,22 @@ from __future__ import print_function
 
 import math
 import tensorflow as tf
+from tensorflow.python.platform import tf_logging as logging
+import time
 import numpy as np
 
 from datasets import dataset_factory
 from nets import nets_factory
-from preprocessing import preprocessing_factory
-from tensorflow.python.platform import tf_logging as logging
-import time
 from nets.densenet import densenet_arg_scope
+from preprocessing import preprocessing_factory
 import pandas as pd
-from tensorflow.contrib.framework.python.ops.variables import get_or_create_global_step
 
+from tensorflow.contrib.framework.python.ops.variables import get_or_create_global_step
 
 slim = tf.contrib.slim
 
 tf.app.flags.DEFINE_integer(
-    'batch_size', 1, 'The number of samples in each batch.')
+    'batch_size', 100, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
     'max_num_batches', None,
@@ -91,6 +76,9 @@ tf.app.flags.DEFINE_string(
 
 FLAGS = tf.app.flags.FLAGS
 
+#State the batch_size to evaluate each time, which can be a lot more than the training batch
+batch_size = 1
+
 #State the number of epochs to evaluate
 num_epochs = 1
 
@@ -106,18 +94,29 @@ for line in labels:
     string_name=str(string_name, encoding='utf-8')
     labels_to_name[int(label)] = string_name
 
+#Create the file pattern of your TFRecord files so that it could be recognized later on
+file_pattern = 'origin_%s_*.tfrecord'
 
-def main(_):
+#Create a dictionary that will help people understand your dataset better. This is required by the Dataset class later.
+items_to_descriptions = {
+    'image': 'A 3-channel RGB coloured flower image that is either tulips, sunflowers, roses, dandelion, or daisy.',
+    'label': 'A label that is as such -- 0:daisy, 1:dandelion, 2:roses, 3:sunflowers, 4:tulips'
+}
+
+
+def run():
     if not FLAGS.dataset_dir:
         raise ValueError('You must supply the dataset directory with --dataset_dir')
-        
-    tf.logging.set_verbosity(tf.logging.INFO)
-    with tf.Graph().as_default():
 
+    tf.logging.set_verbosity(tf.logging.INFO)
+
+    #Just construct the graph from scratch again
+    with tf.Graph().as_default() as graph:
         ######################
         # Select the dataset #
         ######################
-        dataset = dataset_factory.get_dataset(FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+        dataset = dataset_factory.get_dataset(
+            FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
     
         ####################
         # Select the model #
@@ -154,29 +153,20 @@ def main(_):
             batch_size=FLAGS.batch_size,
             num_threads=FLAGS.num_preprocessing_threads,
             capacity=5 * FLAGS.batch_size)
-        
-        ####################
-        # Define the model #
-        ####################
-    #    logits, end_points = network_fn(images)
     
-    #    predictions = tf.argmax(logits, 1)
-    
-        # TODO(sguada) use num_epochs=1
-        num_batches_per_epoch = math.ceil(dataset.num_samples / float(FLAGS.batch_size))
+
+        num_batches_per_epoch = math.ceil(dataset.num_samples / float(batch_size))
         num_steps_per_epoch = num_batches_per_epoch
 
         with slim.arg_scope(densenet_arg_scope()):
-            logits, end_points = network_fn(images)    
-            
-        print (FLAGS.checkpoint_path)
-        if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
-            checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
-        else:
-            checkpoint_path = FLAGS.checkpoint_path
-        tf.logging.info('Evaluating %s' % checkpoint_path)
+            logits, end_points = network_fn(images)
 
-    
+        if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
+          checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
+        else:
+          checkpoint_path = FLAGS.checkpoint_path
+        tf.logging.info('Evaluating %s' % checkpoint_path)
+        
         # #get all the variables to restore from the checkpoint file and create the saver function to restore
         variables_to_restore = slim.get_variables_to_restore()
         saver = tf.train.Saver(variables_to_restore)
@@ -245,4 +235,4 @@ def main(_):
 
 
 if __name__ == '__main__':
-  tf.app.run()
+    run()

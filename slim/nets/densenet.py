@@ -35,7 +35,7 @@ def transition(net, num_outputs, scope='transition'):
     net = slim.avg_pool2d(net, [2, 2], stride=2, scope=scope + '_avgpool')  
     return net   
 
-def densenet(images, num_classes=1001, is_training=False,
+def densenet(images, num_classes=100, is_training=False,
              dropout_keep_prob=0.8,
              scope='densenet'):
     """Creates a variant of the densenet model.
