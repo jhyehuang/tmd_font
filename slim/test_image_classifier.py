@@ -188,8 +188,8 @@ def main(_):
         #Just define the metrics to track without the loss or whatsoever
 #        predictions = tf.argmax(logits, 1)
 #        predictions = end_points[]
-#        top_k_pred = tf.nn.top_k(end_points['predictions'], k=5)
-        top_k_pred = tf.nn.top_k(logits, k=5)
+        top_k_pred = tf.nn.top_k(end_points['predictions'], k=5)
+#        top_k_pred = tf.nn.top_k(logits, k=5)
         
         #Create the global step and an increment op for monitoring
         global_step = get_or_create_global_step()
@@ -233,16 +233,17 @@ def main(_):
                 my_predictions=[]
                 for x in font_index:
                     my_predictions.append(labels_to_name[int(x)])
-                my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
+                logging.info(str(file_names_[0],'utf-8').split('/'))
+                my_file_name=str(file_names_[0],'utf-8').split('/')[7]
                 logging.info(my_predictions)
                 logging.info('my_file_name={}'.format(my_file_name))
-                if file_names_all not in all_key:
-                    all_key[file_names_all]=''
+                if my_file_name not in all_key:
+                    all_key[my_file_name]=''
                 file_names_all = np.append(file_names_all, my_file_name)
                 predictions_all = np.append(predictions_all, ''.join(my_predictions))
 
             #At the end of all the evaluation, show the final accuracy
-            logging.info('总处理不重复的文件数:{}',len(all_key))
+            logging.info('总处理不重复的文件数:'+str(len(all_key)))
             logging.info('Model evaluation has completed! Visit TensorBoard for more information regarding your evaluation.')
         rpt = pd.DataFrame({'filename':file_names_all,'label':predictions_all})  
         rpt.to_csv(FLAGS.test_dir+'/chinese_font.csv',encoding = "utf-8",index=False)

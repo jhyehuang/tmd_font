@@ -40,7 +40,7 @@ import dataset_utils
 _DATA_URL = 'http://download.tensorflow.org/example_images/flower_photos.tgz'
 
 # The number of images in the validation set.
-_NUM_VALIDATION = 4000
+_NUM_VALIDATION = 10000
 
 # Seed for repeatability.
 _RANDOM_SEED = 0
@@ -83,10 +83,12 @@ def _get_filenames(dataset_dir):
   flower_root = os.path.join(dataset_dir, 'test1')
 
   photo_filenames = []
+  all_files={}
   for filename in os.listdir(flower_root):
     path = os.path.join(flower_root, filename)
     photo_filenames.append(path)
-
+    all_files[filename]=''
+  print('总文件数：'+str(len(all_files)))
   return photo_filenames
 
 
