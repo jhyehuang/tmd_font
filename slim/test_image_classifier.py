@@ -188,7 +188,8 @@ def main(_):
         #Just define the metrics to track without the loss or whatsoever
 #        predictions = tf.argmax(logits, 1)
 #        predictions = end_points[]
-        top_k_pred = tf.nn.top_k(end_points['predictions'], k=5)
+#        top_k_pred = tf.nn.top_k(end_points['predictions'], k=5)
+        top_k_pred = tf.nn.top_k(logits, k=5)
         
         #Create the global step and an increment op for monitoring
         global_step = get_or_create_global_step()
