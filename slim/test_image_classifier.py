@@ -243,7 +243,7 @@ def main(_):
             #At the end of all the evaluation, show the final accuracy
             logging.info('Model evaluation has completed! Visit TensorBoard for more information regarding your evaluation.')
         rpt = pd.DataFrame({'filename':file_names_all,'label':predictions_all})  
-        rpt.to_csv('chinese_font.csv',encoding = "utf-8")
+        rpt.to_csv(FLAGS.test_dir+'/chinese_font.csv',encoding = "utf-8")
 
 
 if __name__ == '__main__':
