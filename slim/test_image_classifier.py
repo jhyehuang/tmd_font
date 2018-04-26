@@ -197,6 +197,7 @@ def main(_):
         
         file_names_all = []
         predictions_all = []
+        all_key={}
         #Create a evaluation step function
         def eval_step(sess, top_k_pred,file_names,global_step):
             '''
@@ -235,14 +236,17 @@ def main(_):
                 my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
                 logging.info(my_predictions)
                 logging.info('my_file_name={}'.format(my_file_name))
+                if file_names_all not in all_key:
+                    all_key[file_names_all]=''
                 file_names_all = np.append(file_names_all, my_file_name)
                 predictions_all = np.append(predictions_all, ''.join(my_predictions))
 
             #At the end of all the evaluation, show the final accuracy
+            logging.info('总处理不重复的文件数:{}',len(all_key))
             logging.info('Model evaluation has completed! Visit TensorBoard for more information regarding your evaluation.')
         rpt = pd.DataFrame({'filename':file_names_all,'label':predictions_all})  
         rpt.to_csv(FLAGS.test_dir+'/chinese_font.csv',encoding = "utf-8",index=False)
-
+        
 
 if __name__ == '__main__':
   tf.app.run()
