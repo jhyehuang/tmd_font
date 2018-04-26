@@ -104,8 +104,6 @@ def main(_):
         num_classes=(dataset.num_classes - FLAGS.labels_offset),
         is_training=False)
 
-    num_batches_per_epoch = math.ceil(100 / float(batch_size))
-    num_steps_per_epoch = num_batches_per_epoch
     ##############################################################
     # Create a dataset provider that loads data from the dataset #
     ##############################################################
