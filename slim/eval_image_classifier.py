@@ -134,10 +134,7 @@ def main(_):
         batch_size=FLAGS.batch_size,
         num_threads=FLAGS.num_preprocessing_threads,
         capacity=5 * FLAGS.batch_size)
-
-    global_step = get_or_create_global_step()
-    global_step_op = tf.assign(global_step, global_step + 1) #no apply_gradient method so manually increasing the global_step
-        
+   
     ####################
     # Define the model #
     ####################
