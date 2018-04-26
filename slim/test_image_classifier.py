@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -233,8 +235,8 @@ def main(_):
                     for x in font_index:
                         my_predictions.append(labels_to_name[int(x)])
                     my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
-                    print(my_predictions)
-                    print('my_file_name={}'.format(my_file_name))
+                    logging.info(my_predictions)
+                    logging.info('my_file_name={}'.format(my_file_name))
                     file_names_all = np.append(file_names_all, my_file_name)
                     predictions_all = np.append(predictions_all, ''.join(my_predictions))
 
