@@ -227,23 +227,20 @@ def main(_):
             for step in range(num_steps_per_epoch * num_epochs):
                 sess.run(sv.global_step)
                 #print vital information every start of the epoch as always
-                if step % num_batches_per_epoch == 0:
-                    logging.info('Epoch: %s/%s', step / num_batches_per_epoch + 1, num_epochs)
-                else:
-                    predictions_ ,font_index,file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
-                    my_predictions=[]
-                    for x in font_index:
-                        my_predictions.append(labels_to_name[int(x)])
-                    my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
-                    logging.info(my_predictions)
-                    logging.info('my_file_name={}'.format(my_file_name))
-                    file_names_all = np.append(file_names_all, my_file_name)
-                    predictions_all = np.append(predictions_all, ''.join(my_predictions))
+                predictions_ ,font_index,file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
+                my_predictions=[]
+                for x in font_index:
+                    my_predictions.append(labels_to_name[int(x)])
+                my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
+                logging.info(my_predictions)
+                logging.info('my_file_name={}'.format(my_file_name))
+                file_names_all = np.append(file_names_all, my_file_name)
+                predictions_all = np.append(predictions_all, ''.join(my_predictions))
 
             #At the end of all the evaluation, show the final accuracy
             logging.info('Model evaluation has completed! Visit TensorBoard for more information regarding your evaluation.')
         rpt = pd.DataFrame({'filename':file_names_all,'label':predictions_all})  
-        rpt.to_csv(FLAGS.test_dir+'/chinese_font.csv',encoding = "utf-8")
+        rpt.to_csv(FLAGS.test_dir+'/chinese_font.csv',encoding = "utf-8",index=False)
 
 
 if __name__ == '__main__':
