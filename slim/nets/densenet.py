@@ -130,5 +130,5 @@ def densenet_arg_scope(weight_decay=0.004):
             stride=1) as sc:
         return sc
 
-
-densenet.default_image_size = 224
+#densenet.default_image_size = 299
+densenet.default_image_size = 299
