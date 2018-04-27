@@ -14,9 +14,6 @@ python -u train_image_classifier.py \
     --batch_size=32 \
     --max_number_of_steps=100000 \
     --learning_rate_decay_type=fixed \
-    --save_interval_secs=60 \
-    --save_summaries_secs=60 \
-    --log_every_n_steps=100 \
     --optimizer=rmsprop \
     --weight_decay=0.00004
 

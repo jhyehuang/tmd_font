@@ -186,11 +186,13 @@ def main(_):
             return saver.restore(sess, checkpoint_path)
 
         #Just define the metrics to track without the loss or whatsoever
-#        predictions = tf.argmax(logits, 1)
-#        predictions = end_points[]
-        top_k_pred = tf.nn.top_k(end_points['predictions'], k=5)
+        #predictions_e = tf.argmax(logits, 100)
+        predictions_e = end_points['predictions']
+
+        top_k_pred = tf.nn.top_k(predictions_e, k=5)
 #        top_k_pred = tf.nn.top_k(logits, k=5)
-        
+        tf.logging.info(' logits=%s' % logits)
+        tf.logging.info(' end_points=%s' % end_points)
         #Create the global step and an increment op for monitoring
         global_step = get_or_create_global_step()
         global_step_op = tf.assign(global_step, global_step + 1) #no apply_gradient method so manually increasing the global_step
@@ -226,7 +228,7 @@ def main(_):
         #Now we are ready to run in one session
         #config = tf.ConfigProto(device_count={'GPU':0}) # mask GPUs visible to the session so it falls back on CPU
         with sv.managed_session() as sess:
-            for step in range(num_steps_per_epoch * num_epochs):
+            for step in range(2*num_steps_per_epoch * num_epochs):
                 sess.run(sv.global_step)
                 #print vital information every start of the epoch as always
                 predictions_ ,font_index,file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
@@ -238,7 +240,9 @@ def main(_):
                 logging.info(my_predictions)
                 logging.info('my_file_name={}'.format(my_file_name))
                 if my_file_name not in all_key:
-                    all_key[my_file_name]=''
+                    all_key[my_file_name]=predictions_all
+                if len(predictions_all)==10000:
+                    break
                 file_names_all = np.append(file_names_all, my_file_name)
                 predictions_all = np.append(predictions_all, ''.join(my_predictions))
 
