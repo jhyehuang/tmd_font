@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Generic evaluation script that evaluates a model using a given dataset."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -5,22 +22,22 @@ from __future__ import print_function
 
 import math
 import tensorflow as tf
-from tensorflow.python.platform import tf_logging as logging
-import time
 import numpy as np
 
 from datasets import dataset_factory
 from nets import nets_factory
-from nets.densenet import densenet_arg_scope
 from preprocessing import preprocessing_factory
+from tensorflow.python.platform import tf_logging as logging
+import time
+from nets.densenet import densenet_arg_scope
 import pandas as pd
-
 from tensorflow.contrib.framework.python.ops.variables import get_or_create_global_step
+
 
 slim = tf.contrib.slim
 
 tf.app.flags.DEFINE_integer(
-    'batch_size', 100, 'The number of samples in each batch.')
+    'batch_size', 1, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
     'max_num_batches', None,
@@ -76,9 +93,6 @@ tf.app.flags.DEFINE_string(
 
 FLAGS = tf.app.flags.FLAGS
 
-#State the batch_size to evaluate each time, which can be a lot more than the training batch
-batch_size = 1
-
 #State the number of epochs to evaluate
 num_epochs = 1
 
@@ -94,29 +108,18 @@ for line in labels:
     string_name=str(string_name, encoding='utf-8')
     labels_to_name[int(label)] = string_name
 
-#Create the file pattern of your TFRecord files so that it could be recognized later on
-file_pattern = 'origin_%s_*.tfrecord'
 
-#Create a dictionary that will help people understand your dataset better. This is required by the Dataset class later.
-items_to_descriptions = {
-    'image': 'A 3-channel RGB coloured flower image that is either tulips, sunflowers, roses, dandelion, or daisy.',
-    'label': 'A label that is as such -- 0:daisy, 1:dandelion, 2:roses, 3:sunflowers, 4:tulips'
-}
-
-
-def run():
+def main(_):
     if not FLAGS.dataset_dir:
         raise ValueError('You must supply the dataset directory with --dataset_dir')
-
+        
     tf.logging.set_verbosity(tf.logging.INFO)
+    with tf.Graph().as_default():
 
-    #Just construct the graph from scratch again
-    with tf.Graph().as_default() as graph:
         ######################
         # Select the dataset #
         ######################
-        dataset = dataset_factory.get_dataset(
-            FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+        dataset = dataset_factory.get_dataset(FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
     
         ####################
         # Select the model #
@@ -153,20 +156,29 @@ def run():
             batch_size=FLAGS.batch_size,
             num_threads=FLAGS.num_preprocessing_threads,
             capacity=5 * FLAGS.batch_size)
+        
+        ####################
+        # Define the model #
+        ####################
+    #    logits, end_points = network_fn(images)
     
-
-        num_batches_per_epoch = math.ceil(dataset.num_samples / float(batch_size))
+    #    predictions = tf.argmax(logits, 1)
+    
+        # TODO(sguada) use num_epochs=1
+        num_batches_per_epoch = math.ceil(dataset.num_samples / float(FLAGS.batch_size))
         num_steps_per_epoch = num_batches_per_epoch
 
         with slim.arg_scope(densenet_arg_scope()):
-            logits, end_points = network_fn(images)
-
+            logits, end_points = network_fn(images)    
+            
+        print (FLAGS.checkpoint_path)
         if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
-          checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
+            checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
         else:
-          checkpoint_path = FLAGS.checkpoint_path
+            checkpoint_path = FLAGS.checkpoint_path
         tf.logging.info('Evaluating %s' % checkpoint_path)
-        
+
+    
         # #get all the variables to restore from the checkpoint file and create the saver function to restore
         variables_to_restore = slim.get_variables_to_restore()
         saver = tf.train.Saver(variables_to_restore)
@@ -177,6 +189,7 @@ def run():
 #        predictions = tf.argmax(logits, 1)
 #        predictions = end_points[]
         top_k_pred = tf.nn.top_k(end_points['predictions'], k=5)
+#        top_k_pred = tf.nn.top_k(logits, k=5)
         
         #Create the global step and an increment op for monitoring
         global_step = get_or_create_global_step()
@@ -184,6 +197,7 @@ def run():
         
         file_names_all = []
         predictions_all = []
+        all_key={}
         #Create a evaluation step function
         def eval_step(sess, top_k_pred,file_names,global_step):
             '''
@@ -193,17 +207,11 @@ def run():
 #            global_step_count, predictions_ = sess.run([global_step_op, predictions])
             p_file_name=sess.run(file_names)
             global_step_count=sess.run(global_step_op)
-            output = sess.run(top_k_pred)  
-            probability = np.array(output[0]).flatten()  # 取出概率值，将其展成一维数组  
-            index = np.array(output[1]).flatten()
-            tf.logging.info(' %s' % probability)
-            tf.logging.info(' %s' % index)
-            predictions_=probability
             time_elapsed = time.time() - start_time
             #Log some information
             logging.info('Global Step %s: Streaming Accuracy: (%.2f sec/step)', global_step_count, time_elapsed)
 
-            return  predictions_,index,p_file_name
+            return  p_file_name
 
 
         #Get your supervisor
@@ -215,24 +223,15 @@ def run():
             for step in range(num_steps_per_epoch * num_epochs):
                 sess.run(sv.global_step)
                 #print vital information every start of the epoch as always
-                if step % num_batches_per_epoch == 0:
-                    logging.info('Epoch: %s/%s', step / num_batches_per_epoch + 1, num_epochs)
-                else:
-                    predictions_ ,font_index,file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
-                    my_predictions=[]
-                    for x in font_index:
-                        my_predictions.append(labels_to_name[int(x)])
-                    my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
-                    print(my_predictions)
-                    print('my_file_name={}'.format(my_file_name))
-                    file_names_all = np.append(file_names_all, my_file_name)
-                    predictions_all = np.append(predictions_all, ''.join(my_predictions))
+                file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
+
+                my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
+                logging.info('my_file_name='+my_file_name)
+                if my_file_name not in all_key:
+                    all_key[my_file_name]=''
 
             #At the end of all the evaluation, show the final accuracy
-            logging.info('Model evaluation has completed! Visit TensorBoard for more information regarding your evaluation.')
-        rpt = pd.DataFrame({'filename':file_names_all,'label':predictions_all})  
-        rpt.to_csv('chinese_font.csv',encoding = "utf-8")
-
+            logging.info('总处理不重复的文件数:'+str(len(all_key)))        
 
 if __name__ == '__main__':
-    run()
+  tf.app.run()
