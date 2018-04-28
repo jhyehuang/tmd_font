@@ -80,7 +80,7 @@ def _get_filenames(dataset_dir):
     A list of image file paths, relative to `dataset_dir` and the list of
     subdirectories, representing class names.
   """
-  flower_root = os.path.join(dataset_dir, 'test1/')
+  flower_root = os.path.join(dataset_dir, 'test1//')
   print(flower_root)
   photo_filenames = []
   all_files={}
@@ -132,9 +132,9 @@ def _convert_dataset(split_name, filenames, dataset_dir):
             image_data = tf.gfile.FastGFile(filenames[i], 'rb').read()
             height, width = image_reader.read_image_dims(sess, image_data)
             
-            path_name = filenames[i].split('/')
+            path_name = filenames[i].split('//')
             print(path_name)
-            filename = bytes(path_name[4],encoding='utf-8')
+            filename = bytes(path_name[1],encoding='utf-8')
             print(filenames[i]+'\n')
             print(filename)
             example = dataset_utils.test_image_to_tfexample(
