@@ -208,9 +208,9 @@ def main(_):
             '''
             start_time = time.time()
 #            global_step_count, predictions_ = sess.run([global_step_op, predictions])
-            p_file_name=sess.run(file_names)
-            global_step_count=sess.run(global_step_op)
-            output = sess.run(top_k_pred)  
+#            p_file_name=sess.run(file_names)
+            global_step_count,p_file_name,output=sess.run([global_step_op,file_names,top_k_pred])
+#            output = sess.run(top_k_pred)  
             probability = np.array(output[0]).flatten()  # 取出概率值，将其展成一维数组  
             index = np.array(output[1]).flatten()
             tf.logging.info(' %s' % probability)
@@ -236,6 +236,7 @@ def main(_):
                 my_predictions=[]
                 for x in font_index:
                     my_predictions.append(labels_to_name[int(x)])
+                logging.info(file_names_)
                 logging.info(str(file_names_[0],'utf-8'))
                 my_file_name=str(file_names_[0],'utf-8')
                 logging.info(my_predictions)

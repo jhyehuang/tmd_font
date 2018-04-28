@@ -225,7 +225,6 @@ def main(_):
                 sess.run(sv.global_step)
                 #print vital information every start of the epoch as always
                 file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
-
                 my_file_name=str(file_names_[0],'utf-8')
                 logging.info('my_file_name='+my_file_name)
                 if my_file_name not in all_key:
