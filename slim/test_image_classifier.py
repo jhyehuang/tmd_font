@@ -245,8 +245,6 @@ def main(_):
                     all_key[my_file_name]=predictions_all
                 else:
                     c_key[my_file_name]=predictions_all
-                if len(all_key)==10000:
-                    break
                 file_names_all = np.append(file_names_all, my_file_name)
                 predictions_all = np.append(predictions_all, ''.join(my_predictions))
 
