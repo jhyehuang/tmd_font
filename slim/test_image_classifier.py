@@ -55,7 +55,7 @@ tf.app.flags.DEFINE_string(
     'test_dir', '/tmp/tfmodel/', 'Directory where the results are saved to.')
 
 tf.app.flags.DEFINE_integer(
-    'num_preprocessing_threads', 4,
+    'num_preprocessing_threads', 8,
     'The number of threads used to create the batches.')
 
 tf.app.flags.DEFINE_string(
@@ -135,7 +135,7 @@ def main(_):
         provider = slim.dataset_data_provider.DatasetDataProvider(
             dataset,
             shuffle=False,
-            common_queue_capacity=20 * FLAGS.batch_size,
+            common_queue_capacity=2 * FLAGS.batch_size,
             common_queue_min=FLAGS.batch_size)
         [image, file_name] = provider.get(['image', 'file_name'])
     
@@ -244,7 +244,7 @@ def main(_):
                     all_key[my_file_name]=predictions_all
                 else:
                     c_key[my_file_name]=predictions_all
-                if len(predictions_all)==10000:
+                if len(all_key)==10000:
                     break
                 file_names_all = np.append(file_names_all, my_file_name)
                 predictions_all = np.append(predictions_all, ''.join(my_predictions))
