@@ -191,7 +191,7 @@ def main(_):
 
         #top_k_pred = tf.nn.top_k(predictions_e, k=5)
 #        top_k_pred = tf.nn.top_k(predictions_e, k=1)
-        top_k_pred = tf.nn.top_k(logits, k=5)
+        top_k_pred = tf.nn.top_k(logits, k=1)
         tf.logging.info(' logits=%s' % logits)
         tf.logging.info(' end_points=%s' % end_points)
         #Create the global step and an increment op for monitoring
