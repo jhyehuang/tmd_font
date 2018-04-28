@@ -55,7 +55,7 @@ tf.app.flags.DEFINE_string(
     'test_dir', '/tmp/tfmodel/', 'Directory where the results are saved to.')
 
 tf.app.flags.DEFINE_integer(
-    'num_preprocessing_threads', 4,
+    'num_preprocessing_threads', 1,
     'The number of threads used to create the batches.')
 
 tf.app.flags.DEFINE_string(
@@ -200,6 +200,7 @@ def main(_):
         file_names_all = []
         predictions_all = []
         all_key={}
+        c_key={}
         #Create a evaluation step function
         def eval_step(sess, top_k_pred,file_names,global_step):
             '''
@@ -228,19 +229,21 @@ def main(_):
         #Now we are ready to run in one session
         #config = tf.ConfigProto(device_count={'GPU':0}) # mask GPUs visible to the session so it falls back on CPU
         with sv.managed_session() as sess:
-            for step in range(2*num_steps_per_epoch * num_epochs):
+            for step in range(num_steps_per_epoch * num_epochs):
                 sess.run(sv.global_step)
                 #print vital information every start of the epoch as always
                 predictions_ ,font_index,file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
                 my_predictions=[]
                 for x in font_index:
                     my_predictions.append(labels_to_name[int(x)])
-                logging.info(str(file_names_[0],'utf-8').split('/'))
-                my_file_name=str(file_names_[0],'utf-8').split('/')[7]
+                logging.info(str(file_names_[0],'utf-8'))
+                my_file_name=str(file_names_[0],'utf-8')
                 logging.info(my_predictions)
                 logging.info('my_file_name={}'.format(my_file_name))
                 if my_file_name not in all_key:
                     all_key[my_file_name]=predictions_all
+                else:
+                    c_key[my_file_name]=predictions_all
                 if len(predictions_all)==10000:
                     break
                 file_names_all = np.append(file_names_all, my_file_name)
@@ -248,6 +251,7 @@ def main(_):
 
             #At the end of all the evaluation, show the final accuracy
             logging.info('总处理不重复的文件数:'+str(len(all_key)))
+            logging.info('总处理重复的文件数:'+str(len(c_key)))
             logging.info('Model evaluation has completed! Visit TensorBoard for more information regarding your evaluation.')
         rpt = pd.DataFrame({'filename':file_names_all,'label':predictions_all})  
         rpt.to_csv(FLAGS.test_dir+'/chinese_font.csv',encoding = "utf-8",index=False)

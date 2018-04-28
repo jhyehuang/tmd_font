@@ -198,6 +198,7 @@ def main(_):
         file_names_all = []
         predictions_all = []
         all_key={}
+        c_key={}
         #Create a evaluation step function
         def eval_step(sess, top_k_pred,file_names,global_step):
             '''
@@ -225,13 +226,16 @@ def main(_):
                 #print vital information every start of the epoch as always
                 file_names_= eval_step(sess,top_k_pred,file_names, global_step = sv.global_step)
 
-                my_file_name=str(file_names_[0],'utf-8').split('\\')[2]
+                my_file_name=str(file_names_[0],'utf-8')
                 logging.info('my_file_name='+my_file_name)
                 if my_file_name not in all_key:
-                    all_key[my_file_name]=''
+                    all_key[my_file_name]=my_file_name
+                else:
+                    c_key[my_file_name]=my_file_name
 
             #At the end of all the evaluation, show the final accuracy
-            logging.info('总处理不重复的文件数:'+str(len(all_key)))        
+            logging.info('总处理不重复的文件数:'+str(len(all_key))) 
+            logging.info('总处理重复的文件数:'+str(len(c_key))) 
 
 if __name__ == '__main__':
   tf.app.run()

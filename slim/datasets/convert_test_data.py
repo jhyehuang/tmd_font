@@ -114,7 +114,6 @@ def _convert_dataset(split_name, filenames, dataset_dir):
 
   with tf.Graph().as_default():
     image_reader = ImageReader()
-
     with tf.Session('') as sess:
 
       for shard_id in range(_NUM_SHARDS):
@@ -132,10 +131,11 @@ def _convert_dataset(split_name, filenames, dataset_dir):
             # Read the filename:
             image_data = tf.gfile.FastGFile(filenames[i], 'rb').read()
             height, width = image_reader.read_image_dims(sess, image_data)
-
-            class_name = os.path.basename(os.path.dirname(filenames[i]))
-            filename = bytes(filenames[i],encoding='utf-8')
-
+            
+            path_name = os.path.dirname(filenames[i])
+            filename = bytes(filenames[i].lstrip(path_name),encoding='utf-8')
+            print(os.path.dirname(filenames[i])+'\n')
+            print(filenames[i].lstrip(path_name))
             example = dataset_utils.test_image_to_tfexample(
                 image_data, b'jpg', height, width, filename)
             tfrecord_writer.write(example.SerializeToString())
