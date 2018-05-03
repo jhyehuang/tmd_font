@@ -9,7 +9,7 @@ python -u train_image_classifier.py \
     --model_name=densenet \
     --checkpoint_path=/home/zhijie.huang/github/data/TMD/train_set/ \
     --train_dir=/home/zhijie.huang/github/data/TMD/train_set \
-    --learning_rate=0.01 \
+    --learning_rate=0.088 \
     --ignore_missing_vars=True \
     --batch_size=32 \
     --max_number_of_steps=100000 \
@@ -35,3 +35,16 @@ python -u train_image_classifier.py \
     --optimizer=rmsprop \
     --weight_decay=0.00004
     
+#第一次训练
+python -u train_image_classifier.py \
+    --dataset_name=chinese_font \
+    --dataset_dir=/home/zhijie.huang/github/data/TMD \
+    --model_name=inception_v4 \
+    --train_dir=/home/zhijie.huang/github/data/TMD/train_set_v4 \
+    --learning_rate=0.088 \
+    --ignore_missing_vars=True \
+    --batch_size=32 \
+    --max_number_of_steps=100000 \
+    --learning_rate_decay_type=fixed \
+    --optimizer=adam \
+    --weight_decay=0.00004
