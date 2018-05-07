@@ -48,3 +48,29 @@ python -u train_image_classifier.py \
     --learning_rate_decay_type=fixed \
     --optimizer=adam \
     --weight_decay=0.00004
+
+#第一次训练
+python -u train_image_classifier.py \
+    --dataset_name=chinese_font \
+    --dataset_dir=/home/zhijie.huang/github/data/TMD \
+    --model_name=alexnet_v2 \
+    --train_dir=/home/zhijie.huang/github/data/TMD/train_set_alexnet_v2 \
+    --learning_rate=0.088 \
+    --ignore_missing_vars=True \
+    --batch_size=32 \
+    --max_number_of_steps=100000 \
+    --learning_rate_decay_type=fixed \
+    --optimizer=adam 
+    --weight_decay=0.00004
+
+
+#预测
+python test_image_classifier.py \
+  --checkpoint_path=/home/zhijie.huang/github/data/TMD/train_set_alexnet_v2/ \
+  --test_dir=/home/zhijie.huang/github/data/TMD/test_alexnet_v2 \
+  --dataset_name=test_chinese_font \
+  --dataset_split_name=test \
+  --dataset_dir=/home/zhijie.huang/github/data/TMD \
+  --batch_size=1 \
+  --labels_file=/home/zhijie.huang/github/data/TMD/labels.txt \
+  --model_name=alexnet_v2
