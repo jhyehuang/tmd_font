@@ -6,7 +6,7 @@ python ./datasets/convert_test_data.py --dataset_name=chinese_font --dataset_dir
 python -u train_image_classifier.py \
     --dataset_name=chinese_font \
     --dataset_dir=D:/GitHub/data/TMD \
-    --model_name=inception_v4 \
+    --model_name=inception_resnet_v2 \
     --checkpoint_exclude_scopes=InceptionV4/Logits,InceptionV4/AuxLogits/Aux_logits \
     --trainable_scopes=InceptionV4/Logits,InceptionV4/AuxLogits/Aux_logits \
     --train_dir=D:/GitHub/data/TMD/train_set \
@@ -39,3 +39,20 @@ python test_image_classifier.py ^
   --batch_size=1 ^
   --labels_file=D:/GitHub/data/TMD/labels.txt ^
   --model_name=densenet
+  
+  
+python -u train_image_classifier.py \
+    --dataset_name=chinese_font \
+    --dataset_dir=D:/GitHub/data/TMD/train_data \
+    --model_name=inception_resnet_v2 \
+    --checkpoint_path=D:/GitHub/data/TMD/train_data/chkpoint/inception_resnet_v2_2016_08_30.ckpt \
+    --checkpoint_exclude_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits \
+    --trainable_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits \
+    --train_dir=D:/GitHub/data/TMD/train_set \
+    --learning_rate=0.001 \
+    --learning_rate_decay_factor=0.76\
+    --num_epochs_per_decay=50 \
+    --moving_average_decay=0.9999 \
+    --optimizer=adam \
+    --ignore_missing_vars=True \
+    --batch_size=32
