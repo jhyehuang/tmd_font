@@ -31,7 +31,7 @@ slim = tf.contrib.slim
 
 _FILE_PATTERN = 'chinese_font_%s_*.tfrecord'
 
-SPLITS_TO_SIZES = {'test': 16363}
+SPLITS_TO_SIZES = {'test': 16343}
 
 _NUM_CLASSES = 100
 
